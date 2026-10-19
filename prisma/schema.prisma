@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Curso {
+  id          String   @id @default(cuid())
+  linea       String
+  titulo      String
+  nivel       String
+  periodo     String
+  createdAt   DateTime @default(now())
+
+  ejemploIntegrador    String   @default("no")          // "no" | "curso" | "lecciones"
+  ejemploDesc          String   @default("")
+  duracionObjetivo     String   @default("")
+  fuentesEstado        String   @default("pendiente")   // "tengo" | "sugerir" | "pendiente"
+  temario              String   @default("")
+  arquitecturaAprobada Boolean  @default(false)
+
+  lecciones      Leccion[]
+  fuentes    Fuente[]
+  decisiones Decision[]
+
+  @@map("cursos")
+}
+
+model Leccion {
+  id        String   @id @default(cuid())
+  numero    Int      // 1, 2, 3...
+  titulo    String
+  objetivo String @default("")
+  duracion String @default("")
+  usaEjemplo Boolean @default(false) // solo se usa cuando el curso tiene ejemploIntegrador = "lecciones"
+  cursoId   String
+  curso     Curso    @relation(fields: [cursoId], references: [id])
+
+  diapositivas Diapositiva[]
+
+  @@map("lecciones")
+}
+
+model Diapositiva {
+  id         String   @id @default(cuid())
+  numero     Int
+  titulo     String
+  leccionId  String
+  leccion    Leccion  @relation(fields: [leccionId], references: [id])
+
+  capas Capa[]
+
+  @@map("diapositivas")
+}
+
+model Capa {
+  id             String   @id @default(cuid())
+  numero         String   // ej. "3.2"
+  estado         String   @default("borrador") // "borrador" | "aprobada"
+  explicacion    String   @default("")
+  visual         String   @default("")
+  interaccion    String   // nombre de la interacción elegida
+  audio          String   @default("")
+  duracion       String   @default("")
+  nombreArchivo  String   @default("")
+  diapositivaId  String
+  diapositiva    Diapositiva @relation(fields: [diapositivaId], references: [id])
+
+  triggers Json     @default("[]") // [{tipo, detalle}]
+  extra    Json     @default("{}") // feedbackOk, feedbackError, orientacion, etc.
+
+  items Item[]
+
+  @@map("capas")
+}
+
+model InteraccionCatalogo {
+  id          String   @id @default(cuid())
+  nombre      String   @unique
+  tipo        String   // "interaccion" | "trigger"
+  itemLabel   String   @default("")
+  repeatable  Boolean  @default(true)
+  campos      Json     @default("[]") // [{key, label, type}]
+  audioCtx    String   @default("")
+
+  @@map("interacciones_catalogo")
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  kind        String   @default("") // "tarjetas", "elementos", "categorias", etc. (vacío si la interacción solo tiene un repeater)
+  orden       Int
+  datos       Json     // los campos del ítem según su esquema (frente, reverso, texto, etc.)
+  tieneImagen Boolean  @default(false)
+  imagenDesc  String   @default("")
+  tieneAudio  Boolean  @default(false)
+  audioTexto  String   @default("")
+  capaId      String
+  capa        Capa     @relation(fields: [capaId], references: [id])
+
+  @@map("items")
+}
+
+model Fuente {
+  id            String   @id @default(cuid())
+  tipo          String   @default("link")    // "link" | "documento" | "normativa" | "otro"
+  titulo        String
+  url           String   @default("")
+  descripcion   String   @default("")
+  origen        String   @default("usuario") // "usuario" | "sugerida"
+  aprobada      Boolean  @default(true)
+  fechaConsulta DateTime @default(now())
+  createdAt     DateTime @default(now())
+  cursoId       String
+  curso         Curso    @relation(fields: [cursoId], references: [id])
+
+  estadoIndexado String    @default("pendiente") // "pendiente" | "indexando" | "indexada" | "error"
+  fragmentos     Int       @default(0)
+  textoChars     Int       @default(0)
+  indexadoDesde  String    @default("")          // "link" | "archivo" | "texto"
+  indexadoEn     DateTime?
+  errorIndexado  String    @default("")
+
+  @@map("fuentes")
+}
+
+model Decision {
+  id         String   @id @default(cuid())
+  tipo       String   @default("nota") // "kickoff" | "cambio" | "nota"
+  texto      String
+  leccionRef String   @default("")     // texto libre, ej. "Lección 2: Facturación"
+  createdAt  DateTime @default(now())
+  cursoId    String
+  curso      Curso    @relation(fields: [cursoId], references: [id])
+
+  @@map("decisiones")
+}
