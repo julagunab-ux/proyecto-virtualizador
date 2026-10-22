@@ -21,6 +21,7 @@ model Curso {
   fuentesEstado        String   @default("pendiente")   // "tengo" | "sugerir" | "pendiente"
   temario              String   @default("")
   arquitecturaAprobada Boolean  @default(false)
+  herramienta          String   @default("storyline")   // "storyline" | "genially"
 
   lecciones      Leccion[]
   fuentes    Fuente[]
@@ -36,6 +37,9 @@ model Leccion {
   objetivo String @default("")
   duracion String @default("")
   usaEjemplo Boolean @default(false) // solo se usa cuando el curso tiene ejemploIntegrador = "lecciones"
+  numDiapositivas Int?                         // null = aún no confirmado
+  fuentesIds      String[] @default([])        // IDs de Fuente asignadas a esta lección
+  notas           String   @default("")
   cursoId   String
   curso     Curso    @relation(fields: [cursoId], references: [id])
 
@@ -85,6 +89,8 @@ model InteraccionCatalogo {
   repeatable  Boolean  @default(true)
   campos      Json     @default("[]") // [{key, label, type}]
   audioCtx    String   @default("")
+  herramienta String   @default("ambas") // "storyline" | "genially" | "ambas" (entradas compartidas, como "Otro")
+  guia        String   @default("")      // cuándo conviene usar este recurso (la IA lo usará en el paso 6 para elegir el más apropiado)
 
   @@map("interacciones_catalogo")
 }

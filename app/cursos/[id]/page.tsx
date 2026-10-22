@@ -9,10 +9,12 @@ import {
   NIVELES,
   OPC_EJEMPLO,
   OPC_FUENTES,
+  OPC_HERRAMIENTA,
   etiqueta,
   normalizarEjemplo,
   aplicaEjemplo,
 } from "@/lib/kickoff";
+import { verificarLeccion } from "@/lib/preparacion";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +29,7 @@ export default async function CursoPage({
     where: { id },
     include: {
       lecciones: { orderBy: { numero: "asc" }, include: { diapositivas: true } },
+      fuentes: { select: { id: true, aprobada: true, estadoIndexado: true } },
       _count: { select: { fuentes: true, decisiones: true } },
     },
   });
@@ -58,6 +61,7 @@ export default async function CursoPage({
               { key: "ejemploDesc", label: "Descripción del ejemplo integrador", type: "largo", opcional: true },
               { key: "duracionObjetivo", label: "Duración objetivo por lección", opcional: true },
               { key: "fuentesEstado", label: "Estado de las fuentes", type: "select", opciones: OPC_FUENTES },
+              { key: "herramienta", label: "Herramienta de destino", type: "select", opciones: OPC_HERRAMIENTA },
               { key: "temario", label: "Temario", type: "largo", opcional: true },
             ]}
             valores={{
@@ -69,6 +73,7 @@ export default async function CursoPage({
               ejemploDesc: curso.ejemploDesc,
               duracionObjetivo: curso.duracionObjetivo,
               fuentesEstado: curso.fuentesEstado,
+              herramienta: curso.herramienta,
               temario: curso.temario,
             }}
           />
@@ -106,6 +111,12 @@ export default async function CursoPage({
         >
           Bitácora ({curso._count.decisiones})
         </Link>
+        <Link
+          href={`/cursos/${curso.id}/busqueda`}
+          className="text-xs border rounded px-3 py-1.5 hover:bg-zinc-50"
+        >
+          Probar búsqueda
+        </Link>
       </div>
 
       <div className="border rounded-lg p-4 mb-8 space-y-1">
@@ -121,6 +132,10 @@ export default async function CursoPage({
         </p>
         <p className={campoFicha}>
           <span className="font-medium">Fuentes:</span> {etiqueta(OPC_FUENTES, curso.fuentesEstado)}
+        </p>
+        <p className={campoFicha}>
+          <span className="font-medium">Herramienta de destino:</span>{" "}
+          {etiqueta(OPC_HERRAMIENTA, curso.herramienta)}
         </p>
         {curso.temario && (
           <details className="pt-1">
@@ -178,6 +193,21 @@ export default async function CursoPage({
                 {leccion.diapositivas.length} diapositiva(s)
                 {leccion.duracion && ` · Duración estimada: ${leccion.duracion}`}
               </p>
+              {(() => {
+                const estado = verificarLeccion(
+                  curso,
+                  { ...leccion, cantidadDiapositivasExistentes: leccion.diapositivas.length },
+                  curso.fuentes
+                );
+                return (
+                  <Link
+                    href={`/lecciones/${leccion.id}/especificaciones`}
+                    className={`text-xs ${estado.listo ? "text-green-700" : "text-amber-700"}`}
+                  >
+                    {estado.listo ? "Lista para generar" : "Faltan requisitos para generar"}
+                  </Link>
+                );
+              })()}
             </div>
             <div className="flex gap-3">
               <BotonEditar

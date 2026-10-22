@@ -78,8 +78,9 @@ export async function guardarFragmentos(
   });
 
   for (let i = 0; i < registros.length; i += 96) {
-    // Si el compilador se queja del tipo, ajustar solo el tipo (p. ej. "as never").
-    await ns.upsertRecords(registros.slice(i, i + 96) as never);
+    const lote = registros.slice(i, i + 96);
+    // SDK v9: upsertRecords recibe { records }.
+    await ns.upsertRecords({ records: lote } as never);
   }
 }
 
@@ -92,7 +93,8 @@ export async function borrarFragmentos(cursoId: string, fuenteId: string, cantid
 
   const ids = Array.from({ length: cantidad }, (_, i) => idFragmento(fuenteId, i));
   for (let i = 0; i < ids.length; i += 1000) {
-    await ns.deleteMany(ids.slice(i, i + 1000));
+    // SDK v9: deleteMany recibe { ids } o { filter }.
+    await ns.deleteMany({ ids: ids.slice(i, i + 1000) });
   }
 }
 

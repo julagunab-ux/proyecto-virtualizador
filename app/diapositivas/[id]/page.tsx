@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import CrearCapaForm from "@/components/CrearCapaForm";
 import BotonEliminar from "@/components/BotonEliminar";
 import BotonEditar from "@/components/BotonEditar";
+import { filtroHerramienta } from "@/lib/kickoff";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export default async function DiapositivaPage({
   const diapositiva = await prisma.diapositiva.findUnique({
     where: { id },
     include: {
-      leccion: true,
+      leccion: { include: { curso: true } },
       capas: { orderBy: { numero: "asc" } },
     },
   });
@@ -25,7 +26,7 @@ export default async function DiapositivaPage({
   if (!diapositiva) notFound();
 
   const interacciones = await prisma.interaccionCatalogo.findMany({
-    where: { tipo: "interaccion" },
+    where: { tipo: "interaccion", ...(filtroHerramienta(diapositiva.leccion.curso.herramienta) ?? {}) },
     orderBy: { nombre: "asc" },
   });
   const nombresInteraccion = interacciones.map((i) => i.nombre);

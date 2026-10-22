@@ -49,12 +49,27 @@ export function resumenKickoff(c: {
   ejemploDesc: string;
   duracionObjetivo: string;
   fuentesEstado: string;
+  herramienta: string;
 }) {
   return [
     `Kickoff del curso "${c.titulo}".`,
     `Línea: ${c.linea}. Nivel: ${c.nivel}. Periodo: ${c.periodo}.`,
     `Ejemplo integrador: ${etiqueta(OPC_EJEMPLO, normalizarEjemplo(c.ejemploIntegrador))}${c.ejemploDesc ? " (" + c.ejemploDesc + ")" : ""}.`,
     `Duración objetivo por lección: ${c.duracionObjetivo || "sin definir"}.`,
+    `Herramienta de destino: ${etiqueta(OPC_HERRAMIENTA, c.herramienta)}.`,
     `Fuentes: ${etiqueta(OPC_FUENTES, c.fuentesEstado)}.`,
   ].join(" ");
+}
+
+export const OPC_HERRAMIENTA = [
+  { valor: "storyline", label: "Articulate Storyline" },
+  { valor: "genially", label: "Genially" },
+];
+
+// Filtro de Prisma para el catálogo según la herramienta del curso.
+// Un curso usa una sola herramienta: se muestran las entradas de esa herramienta y las compartidas ("ambas").
+// Si no se conoce la herramienta, no se filtra.
+export function filtroHerramienta(herramienta?: string | null) {
+  if (!herramienta) return undefined;
+  return { herramienta: { in: [herramienta, "ambas"] } };
 }

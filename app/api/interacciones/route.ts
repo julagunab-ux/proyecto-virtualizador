@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { filtroHerramienta } from "@/lib/kickoff";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   const tipo = req.nextUrl.searchParams.get("tipo");
+  const herramienta = req.nextUrl.searchParams.get("herramienta");
 
   const interacciones = await prisma.interaccionCatalogo.findMany({
-    where: tipo ? { tipo } : undefined,
+    where: {
+      ...(tipo ? { tipo } : {}),
+      ...(filtroHerramienta(herramienta) ?? {}),
+    },
     orderBy: { nombre: "asc" },
   });
 
@@ -23,6 +28,8 @@ export async function POST(req: NextRequest) {
     repeatable = true,
     campos = [],
     audioCtx = "",
+    herramienta = "ambas",
+    guia = "",
   } = body;
 
   if (!nombre || !tipo) {
@@ -33,7 +40,7 @@ export async function POST(req: NextRequest) {
   }
 
   const interaccion = await prisma.interaccionCatalogo.create({
-    data: { nombre, tipo, itemLabel, repeatable, campos, audioCtx },
+    data: { nombre, tipo, itemLabel, repeatable, campos, audioCtx, herramienta, guia },
   });
 
   return NextResponse.json(interaccion, { status: 201 });

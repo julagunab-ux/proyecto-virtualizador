@@ -55,4 +55,6 @@ export interface InteraccionCatalogoData {
   repeatable: boolean;
   campos: RepeaterConfig[];
   audioCtx: string;
+  herramienta: string; // "storyline" | "genially" | "ambas"
+  guia: string;
 }

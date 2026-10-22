@@ -30,7 +30,7 @@ export default async function LeccionPage({
         &larr; {leccion.curso.titulo}
       </Link>
 
-      <div className="flex justify-between items-start mt-2 mb-6 gap-3">
+      <div className="flex justify-between items-start mt-2 mb-2 gap-3">
         <h1 className="text-2xl font-semibold">
           Lección {leccion.numero}: {leccion.titulo}
         </h1>
@@ -52,6 +52,15 @@ export default async function LeccionPage({
             texto="Eliminar lección"
           />
         </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Link
+          href={`/lecciones/${leccion.id}/especificaciones`}
+          className="text-xs border rounded px-3 py-1.5 hover:bg-zinc-50"
+        >
+          Especificaciones de generación
+        </Link>
       </div>
 
       <CrearDiapositivaForm leccionId={leccion.id} siguienteNumero={leccion.diapositivas.length + 1} />

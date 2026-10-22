@@ -14,7 +14,10 @@ const CAMPOS_TEXTO = [
   "duracionObjetivo",
   "fuentesEstado",
   "temario",
+  "herramienta",
 ] as const;
+
+const HERRAMIENTAS = ["storyline", "genially"];
 
 export async function GET(
   _req: NextRequest,
@@ -40,6 +43,13 @@ export async function PATCH(
 ) {
   const { id } = await params;
   const body = await req.json();
+
+  if ("herramienta" in body && !HERRAMIENTAS.includes(body.herramienta)) {
+    return NextResponse.json(
+      { error: "herramienta debe ser storyline o genially" },
+      { status: 400 }
+    );
+  }
 
   const antes = await prisma.curso.findUnique({ where: { id } });
   if (!antes) {

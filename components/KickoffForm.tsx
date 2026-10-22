@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LINEAS, NIVELES, OPC_EJEMPLO, OPC_FUENTES } from "@/lib/kickoff";
+import { LINEAS, NIVELES, OPC_EJEMPLO, OPC_FUENTES, OPC_HERRAMIENTA } from "@/lib/kickoff";
 
 export default function KickoffForm() {
   const router = useRouter();
@@ -11,6 +11,7 @@ export default function KickoffForm() {
   const [titulo, setTitulo] = useState("");
   const [nivel, setNivel] = useState("FUN");
   const [periodo, setPeriodo] = useState("2026-2");
+  const [herramienta, setHerramienta] = useState("storyline");
   const [ejemploIntegrador, setEjemploIntegrador] = useState("no");
   const [ejemploDesc, setEjemploDesc] = useState("");
   const [duracionObjetivo, setDuracionObjetivo] = useState("2 h de parte práctica");
@@ -32,6 +33,7 @@ export default function KickoffForm() {
         titulo: titulo.trim(),
         nivel,
         periodo: periodo.trim(),
+        herramienta,
         ejemploIntegrador,
         ejemploDesc: ejemploIntegrador === "no" ? "" : ejemploDesc,
         duracionObjetivo,
@@ -127,6 +129,15 @@ export default function KickoffForm() {
           <label className={etiqueta}>6. Periodo / cohorte (Año-Semestre)</label>
           <input value={periodo} onChange={(e) => setPeriodo(e.target.value)} className={campo} required />
         </div>
+      </div>
+
+      <div className="space-y-1">
+        <label className={etiqueta}>7. Herramienta de destino</label>
+        <select value={herramienta} onChange={(e) => setHerramienta(e.target.value)} className={campo}>
+          {OPC_HERRAMIENTA.map((o) => (
+            <option key={o.valor} value={o.valor}>{o.label}</option>
+          ))}
+        </select>
       </div>
 
       <div className="space-y-1">

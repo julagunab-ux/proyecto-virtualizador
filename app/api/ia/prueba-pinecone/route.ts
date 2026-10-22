@@ -16,7 +16,8 @@ export async function GET() {
     if (!indice) throw new Error("No se pudo preparar el índice");
     const ns = indice.namespace("prueba");
 
-    await ns.upsertRecords([
+    await ns.upsertRecords({
+      records: [
       {
         _id: "t1",
         chunk_text: "El impuesto sobre las ventas (IVA) se genera por la venta de bienes y la prestación de servicios.",
@@ -27,7 +28,8 @@ export async function GET() {
         chunk_text: "Una variable en Python es un nombre que referencia un valor almacenado en memoria.",
         tema: "python",
       },
-    ] as never);
+      ],
+    } as never);
 
     // Los registros tardan unos segundos en quedar disponibles para búsqueda
     await new Promise((r) => setTimeout(r, 8000));

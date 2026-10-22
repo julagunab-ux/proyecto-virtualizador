@@ -38,6 +38,9 @@ export async function POST(req: NextRequest) {
         ? body.fuentesEstado
         : "pendiente",
       temario: String(body.temario ?? ""),
+      herramienta: ["storyline", "genially"].includes(body.herramienta)
+        ? body.herramienta
+        : "storyline",
     },
   });
 
